@@ -26,7 +26,10 @@ class LaravelPretendServiceProvider extends ServiceProvider
         }
 
         $this->mergeConfigFrom($configPath, 'pretend');
-        //$this->app->make(Gate::class)->has($this->app)
+
+        if (!$this->app->bound('impersonator')) {
+            $this->app->bind('impersonator', Impersonator::class);
+        }
     }
 
     /**
@@ -47,8 +50,6 @@ class LaravelPretendServiceProvider extends ServiceProvider
           ->give(function (): SessionInterface {
               return $this->app->make('session.store');
           });
-
-        //$this->app['router']->aliasMiddleware('impersonate.protect', ProtectFromImpersonation::class);
     }
 
     /**
