@@ -112,6 +112,20 @@ And here is a simple example using in twig:
                 {% endif %}
 ```
 
+
+## Events
+
+On entering and exitting impersontaion this package raises events: [`Scif\LaravelPretend\Event\Impersontated`](src/Event/Impersonated.php), [`Scif\LaravelPretend\Event\Unimpersontated`](src/Event/Unimpersonated.php).
+Name of events is their fully qualified class names, so simplest event listener will looks like:
+
+```php
+use Scif\LaravelPretend\Event\Impersontated;
+…
+    Event::listen(Impersonated::class, function (Impersonated $event) {
+        //
+    });
+```
+
 ## PHP7? Ugh! Wtf??
 
 Yes, PHP7 is awesome! So, if you want to use it with PHP5 — [create an issue](https://github.com/SCIF/laravel-pretend/issues) and I will create a separate branch or other suitable solution.
@@ -119,5 +133,4 @@ Yes, PHP7 is awesome! So, if you want to use it with PHP5 — [create an issue]
 
 ## TODO:
 
-* describe using in templater
 * create deny impersonation middleware

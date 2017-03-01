@@ -21,6 +21,9 @@ class Impersonate
     /** @var Impersonator $impersonator */
     protected $impersonator;
 
+    /** @var \Illuminate\Contracts\Auth\Authenticatable|null  */
+    protected $user;
+
     const SESSION_NAME = 'pretend:_switch_user';
 
     public function __construct(Guard $guard, Gate $gate, Repository $config, Impersonator $impersonator)
