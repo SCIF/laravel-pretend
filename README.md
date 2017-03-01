@@ -3,7 +3,7 @@
 ## What is that?
 
 Laravel has no default impersonation wrapper for low-level methods.  This package highly inspired by [Symfony impersonation](http://symfony.com/doc/current/security/impersonating_user.html) which looks much more flexible rather than several inspected Laravel implementations.
- Package fully implement GET-parameter-driven behavior. Also, this package does not restrict you in using custom user providers, guards and can be used with Twig as view templater. Some ideas inspired by existing impersonation packages for Laravel.
+ Package fully implement GET-parameter-driven behavior. Also, this package does not restrict you in using custom user providers (for instance, if you use [Propel](https://github.com/propelorm/PropelLaravel)), guards and can be used with [Twig](https://github.com/rcrowe/TwigBridge) as view templater. Some ideas inspired by existing impersonation packages for Laravel.
  
 ## Installation
  
@@ -36,7 +36,7 @@ Laravel has no default impersonation wrapper for low-level methods.  This packag
     This way is most common and covers all cases I can assume.
   * or by [any suitable methods](https://laravel.com/docs/5.4/middleware#registering-middleware) for some especial cases.
   
-The latest step of installation is configuring authorization gate. Package bundled with gate called `impersonate`.
+The latest step of installation is a configuring authorization gate. Package bundled with gate called `impersonate`.
  This gate checks if your user model implements `Scif\LaravelPretend\Interfaces\Impersonable` and check method `canImpersonat(): bool`.
  
  So your model can looks like:
@@ -54,6 +54,12 @@ class User extends Authenticatable implements Impersonable
 
 ## Configuration 
 
+Configuration file can be easily copied to your project by `vendor:publish` command:
+ 
+ ```php
+ php ./artisan  vendor:publish --provider=Scif\\LaravelPretend\\LaravelPretendServiceProvider --tag=config
+ ```
+
 Configuration consist of just two options:
 
 ```php
@@ -69,9 +75,47 @@ return [
 * `auth_check` — this string is a name of [Gate](https://laravel.com/docs/5.4/authorization#gates) used to check ability of user to impersonate.
 In fact the default Gate could be easily overriden in `AuthServiceProvider` of your application.
 
+## Usage
+
+As mentioned above, this package repeats Symfony style of using GET-parameters to manage impersonation.
+
+Blade using is pretty straightforward:
+
+```php
+// generates link with impersonation
+{{ route('home', ['_switch_user' => 'admin@site.com']) }}
+
+// exit impersonation
+    @if ($app['impersonator']->isImpersonated())
+        <a href="{{ route('home', ['_switch_user' => '_exit']) }}">Exit impersonation</a>
+    @else
+        <a href="{{ route('logout') }}">Logout</a>
+    @endif
+```
+
+And here is a simple example using in twig:
+
+```
+// generates link with impersonation
+{{ route('home', {'_switch_user': 'admin@site.com'}) }}
+
+// more advance usage
+                {% if auth_user() %}
+                    {% if app.impersonator.impersonated %}
+                        <a class="btn btn-default" href="{{ route('home', {'_switch_user': '_exit'}) }}">Exit impersonation</a>
+                    {% else %}
+                        <form action="{{ route('logout') }}" method="post">
+                            {{ csrf_field() }}
+                            <button class="btn btn-default">Logout</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+```
+
 ## PHP7? Ugh! Wtf??
 
-Yes, PHP7 is awesome! So, if you want to use it with PHP5 — [create issue](https://github.com/SCIF/laravel-pretend/issues) and I will create separate branch.
+Yes, PHP7 is awesome! So, if you want to use it with PHP5 — [create an issue](https://github.com/SCIF/laravel-pretend/issues) and I will create a separate branch or other suitable solution.
+
 
 ## TODO:
 
