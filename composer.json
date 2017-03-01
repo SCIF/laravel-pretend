@@ -1,0 +1,22 @@
+{
+  "name": "scif/laravel-pretend",
+  "description": "Symfony style impersonation for the Laravel Framework.",
+  "keywords": [
+    "impersonate",
+    "symfony-style",
+    "laravel"
+  ],
+  "license": "MIT",
+  "type": "project",
+  "require": {
+    "php": ">=7.0",
+    "laravel/framework": ">=5.3.*"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Scif\\LaravelPretend\\": "src/"
+    }
+  }
+}
