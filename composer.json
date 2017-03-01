@@ -7,12 +7,16 @@
     "laravel"
   ],
   "license": "MIT",
-  "type": "project",
+  "authors": [
+    {
+      "name": "Alexander Zhuravlev",
+      "email": "scif-1986@yandex.ru"
+    }
+  ],
+  "type": "library",
   "require": {
     "php": ">=7.0",
     "laravel/framework": ">=5.3"
-  },
-  "require-dev": {
   },
   "autoload": {
     "psr-4": {
