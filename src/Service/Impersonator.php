@@ -2,11 +2,12 @@
 
 namespace Scif\LaravelPretend\Service;
 
-use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Session\SessionInterface;
 use Scif\LaravelPretend\Event\Impersonated;
 use Scif\LaravelPretend\Event\Unimprersonated;
@@ -26,8 +27,17 @@ class Impersonator
     /** @var SessionInterface $session */
     protected $session;
 
-    /** @var EventDispatcherInterface $eventDispatcher */
+    /** @var Dispatcher $eventDispatcher */
     protected $eventDispatcher;
+
+    /** @var  Authenticatable */
+    protected $realUser;
+
+    /** @var  Authenticatable */
+    protected $impersonationUser;
+
+    /** @var  bool */
+    protected $isForbidden;
 
     const SESSION_NAME = 'pretend:_switch_user';
 
@@ -36,25 +46,35 @@ class Impersonator
         Repository $config,
         UserProvider $userProvider,
         SessionInterface $session,
-        EventDispatcherInterface $eventDispatcher
+        Dispatcher $eventDispatcher
     )
     {
         $this->guard        = $auth->guard();
+        $this->realUser     = $this->guard->user();
         $this->config       = $config;
         $this->userProvider = $userProvider;
         $this->session      = $session;
         $this->eventDispatcher = $eventDispatcher;
+        $this->isForbidden  = false;
     }
 
     public function exitImpersonation()
     {
+        $this->failIfForbidden();
+
+        $username = $this->session->get(static::SESSION_NAME);
+
+        if (null === $username) {
+            return;
+        }
+
         $this->session->remove(static::SESSION_NAME);
 
         $user = $this->retrieveUser($username);
         $realUser = $this->guard->user();
 
         $event = new Unimprersonated($realUser, $user);
-        $this->eventDispatcher->dispatch(Unimpersonated::class, $event);
+        $this->eventDispatcher->fire($event);
     }
 
     protected function retrieveUser(string $username): Authenticatable
@@ -74,6 +94,8 @@ class Impersonator
 
     public function enterImpersonation(string $username)
     {
+        $this->failIfForbidden();
+
         $user = $this->retrieveUser($username);
         $realUser = $this->guard->user();
 
@@ -81,12 +103,13 @@ class Impersonator
             abort(403, 'Cannot impersonate yourself');
         }
 
+        $this->impersonationUser = $user;
         $this->guard->setUser($user);
 
         $this->session->set(static::SESSION_NAME, $username);
 
         $event = new Impersonated($realUser, $user);
-        $this->eventDispatcher->dispatch(Impersonated::class, $event);
+        $this->eventDispatcher->fire($event);
     }
 
     public function isImpersonated(): bool
@@ -108,5 +131,19 @@ class Impersonator
     public function getImpersonatingIdentifier(): string
     {
         return $this->session->get(static::SESSION_NAME, '');
+    }
+
+    public function forbidImpersonation()
+    {
+        if (null !== $this->impersonationUser) {
+            abort(403, 'Impersonation is forbidden for current request');
+        }
+
+        $this->isForbidden = true;
+    }
+
+    public function failIfForbidden()
+    {
+        abort_if($this->isForbidden, 403, 'Impersonation is forbidden for current request');
     }
 }
