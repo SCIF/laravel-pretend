@@ -126,11 +126,14 @@ use Scif\LaravelPretend\Event\Impersontated;
     });
 ```
 
+## Forbid impersonation
+
+You can use bundled [`ForbidImpersonation`](src/Middleware/ForbidImpersonation.php) middleware to forbid using of impersonation for some route groups, routes or controllers. 
+
 ## PHP7? Ugh! Wtf??
 
-Yes, PHP7 is awesome! So, if you want to use it with PHP5 — [create an issue](https://github.com/SCIF/laravel-pretend/issues) and I will create a separate branch or other suitable solution.
+Yes, PHP7 is awesome! So, if you want to use it with PHP5 — [create an issue](https://github.com/SCIF/laravel-pretend/issues) and I will think about a separate branch or other suitable solution.
 
+## Contribution
 
-## TODO:
-
-* create deny impersonation middleware
+Any type of contributions is highly appreciated. Don't be a shy — help this project become even better!

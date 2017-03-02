@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Scif\LaravelPretend\Interfaces\Impersonable;
 use Scif\LaravelPretend\Service\Impersonator;
 
@@ -24,14 +25,24 @@ class Impersonate
     /** @var \Illuminate\Contracts\Auth\Authenticatable|null  */
     protected $user;
 
+    /** @var Redirector */
+    protected $redirect;
+
     const SESSION_NAME = 'pretend:_switch_user';
 
-    public function __construct(Guard $guard, Gate $gate, Repository $config, Impersonator $impersonator)
+    public function __construct(
+        Guard $guard,
+        Gate $gate,
+        Repository $config,
+        Impersonator $impersonator,
+        Redirector $redirect
+    )
     {
         $this->user         = $guard->user();
         $this->gate         = $gate;
         $this->config       = $config;
         $this->impersonator = $impersonator;
+        $this->redirect     = $redirect;
     }
 
     /**
@@ -57,6 +68,17 @@ class Impersonate
                 }
 
                 $this->impersonator->enterImpersonation($name);
+            }
+
+            if (!$request->isXmlHttpRequest() && $request->isMethod('GET')) {
+                $input = $request->input();
+                unset($input['_switch_user']);
+                $input += $request->route()->parameters();
+
+                return $this->redirect->route(
+                    $request->route()->getName(),
+                    $input
+                );
             }
         } elseif ($this->impersonator->isImpersonated()) {
             $this->checkPermission($this->impersonator->getImpersonatingIdentifier());
