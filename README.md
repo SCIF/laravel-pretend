@@ -1,9 +1,12 @@
 # Impersonate package for the Laravel Framework
 
+[На русском](README_RU.md)
+
 ## What is that?
 
 Laravel has no default impersonation wrapper for low-level methods.  This package highly inspired by [Symfony impersonation](http://symfony.com/doc/current/security/impersonating_user.html) which looks much more flexible rather than several inspected Laravel implementations.
- Package fully implement GET-parameter-driven behavior. Also, this package does not restrict you in using custom user providers (for instance, if you use [Propel](https://github.com/propelorm/PropelLaravel)), guards and can be used with [Twig](https://github.com/rcrowe/TwigBridge) as view templater. Some ideas inspired by existing impersonation packages for Laravel.
+ Package fully implement GET-parameter-driven behavior. Also, this package does not restrict you in using custom [user providers](https://laravel.com/docs/master/authentication#the-user-provider-contract) (for instance, if you use [Propel](https://github.com/propelorm/PropelLaravel)), guards and can be used with [Twig](https://github.com/rcrowe/TwigBridge) as view templater.
+ Some ideas inspired by existing impersonation packages for Laravel (:+1: thanks to those authors!).
  
 ## Installation
  
@@ -36,8 +39,8 @@ Laravel has no default impersonation wrapper for low-level methods.  This packag
     This way is most common and covers all cases I can assume.
   * or by [any suitable methods](https://laravel.com/docs/5.4/middleware#registering-middleware) for some especial cases.
   
-The latest step of installation is a configuring authorization gate. Package bundled with gate called `impersonate`.
- This gate checks if your user model implements `Scif\LaravelPretend\Interfaces\Impersonable` and check method `canImpersonat(): bool`.
+The latest step of installation is a configuring authorization [gate](https://laravel.com/docs/5.3/authorization#gates). Package bundled with gate called `impersonate`.
+ This gate checks if your user model implements `Scif\LaravelPretend\Interfaces\Impersonable` and check method `canImpersonate(): bool`.
  
  So your model can looks like:
 ```php
@@ -50,7 +53,10 @@ class User extends Authenticatable implements Impersonable
         return $this->isAdmin();
     }
 }
-``` 
+```
+ 
+ :point_up: You can use out of box implementation of this gate or override it in your own AuthServiceProvider. 
+ You can override name of gate used to check permissions in configuration as well.
 
 ## Configuration 
 
@@ -71,7 +77,8 @@ return [
 ];
 ```
 
-* `user_identifier` — this string will be used as name of field using to retrieve user object from user provider. The default value `email` makes your impersonation urls beauty: `?_switch_user=admin@site.com` is much clear rather than `?_switch_user=43`. But it's up to you
+* `user_identifier` — this string will be used as name of field using to retrieve user object from user provider (method `retrieveByCredentials()`).
+The default value `email` makes your impersonation urls beauty: `?_switch_user=admin@site.com` is much clear rather than `?_switch_user=43`. But it's up to you
 * `auth_check` — this string is a name of [Gate](https://laravel.com/docs/5.4/authorization#gates) used to check ability of user to impersonate.
 In fact the default Gate could be easily overriden in `AuthServiceProvider` of your application.
 
