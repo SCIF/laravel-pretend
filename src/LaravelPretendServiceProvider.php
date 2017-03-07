@@ -65,6 +65,4 @@ class LaravelPretendServiceProvider extends ServiceProvider
     {
         return strpos($this->app->version(), 'Lumen') !== false;
     }
-
-
 }

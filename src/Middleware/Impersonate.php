@@ -48,6 +48,8 @@ class Impersonate
     /**
      * Handle an incoming request.
      *
+     * @throws \HttpException In event of double attempt to impersonate
+     *
      * @param  \Illuminate\Http\Request $request
      * @param  \Closure                 $next
      *
@@ -88,6 +90,11 @@ class Impersonate
         return $next($request);
     }
 
+    /**
+     * @throws \HttpException In event of lack required abilities will be throw 403 exception
+     *
+     * @param string $username Username of impersonable user
+     */
     protected function checkPermission(string $username)
     {
         $ability  = $this->config->get('pretend.impersonate.auth_check');

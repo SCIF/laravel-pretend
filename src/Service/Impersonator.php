@@ -77,6 +77,12 @@ class Impersonator
         $this->eventDispatcher->fire($event);
     }
 
+    /**
+     * @throws \HttpException Throw 403 exception if cannot find user
+     * @param string $username
+     *
+     * @return Authenticatable
+     */
     protected function retrieveUser(string $username): Authenticatable
     {
         $conditions = [
@@ -92,6 +98,11 @@ class Impersonator
         return $user;
     }
 
+    /**
+     * @throws \HttpException Throw 403 exception if you try to impersonate yourself
+     *
+     * @param string $username Username of user you want to enter impersonate
+     */
     public function enterImpersonation(string $username)
     {
         $this->failIfForbidden();
@@ -117,6 +128,9 @@ class Impersonator
         return $this->session->has(static::SESSION_NAME);
     }
 
+    /**
+     * @throws \HttpException Throw 403 exception if cannot find data in session
+     */
     public function continueImpersonation()
     {
         $name = $this->getImpersonatingIdentifier();
@@ -133,6 +147,9 @@ class Impersonator
         return $this->session->get(static::SESSION_NAME, '');
     }
 
+    /**
+     * @throws \HttpException Throw 403 exception if impersonation is forbidden for current request
+     */
     public function forbidImpersonation()
     {
         if (null !== $this->impersonationUser) {
@@ -142,6 +159,9 @@ class Impersonator
         $this->isForbidden = true;
     }
 
+    /**
+     * @throws \HttpException Throw 403 exception if impersonation is forbidden for current request
+     */
     public function failIfForbidden()
     {
         abort_if($this->isForbidden, 403, 'Impersonation is forbidden for current request');
