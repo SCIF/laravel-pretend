@@ -117,10 +117,12 @@ class Impersonator
         $this->impersonationUser = $user;
         $this->guard->setUser($user);
 
-        $this->session->set(static::SESSION_NAME, $username);
+        if (!$this->session->has(static::SESSION_NAME)) {
+            $this->session->set(static::SESSION_NAME, $username);
 
-        $event = new Impersonated($realUser, $user);
-        $this->eventDispatcher->fire($event);
+            $event = new Impersonated($realUser, $user);
+            $this->eventDispatcher->fire($event);
+        }
     }
 
     public function isImpersonated(): bool
