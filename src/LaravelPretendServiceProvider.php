@@ -2,15 +2,10 @@
 
 namespace Scif\LaravelPretend;
 
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Config\Repository;
-use Illuminate\Events\Dispatcher;
 use Illuminate\Session\SessionInterface;
 use Illuminate\Support\ServiceProvider;
-use Scif\LaravelPretend\Middleware\Impersonate;
 use Scif\LaravelPretend\Service\Impersonator;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class LaravelPretendServiceProvider extends ServiceProvider
 {

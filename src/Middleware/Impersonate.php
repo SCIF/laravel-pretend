@@ -22,8 +22,8 @@ class Impersonate
     /** @var Impersonator $impersonator */
     protected $impersonator;
 
-    /** @var \Illuminate\Contracts\Auth\Authenticatable|null  */
-    protected $user;
+    /** @var Guard  */
+    protected $guard;
 
     /** @var Redirector */
     protected $redirect;
@@ -38,7 +38,7 @@ class Impersonate
         Redirector $redirect
     )
     {
-        $this->user         = $guard->user();
+        $this->guard        = $guard;
         $this->gate         = $gate;
         $this->config       = $config;
         $this->impersonator = $impersonator;
@@ -110,7 +110,7 @@ class Impersonate
             });
         }
 
-        if (!$this->gate->forUser($this->user)->check($ability, [ $username] )) {
+        if (!$this->gate->forUser($this->guard->user())->check($ability, [ $username] )) {
             abort(403, "Current user have no ability '{$ability}'");
         }
     }

@@ -11,7 +11,6 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Session\SessionInterface;
 use Scif\LaravelPretend\Event\Impersonated;
 use Scif\LaravelPretend\Event\Unimprersonated;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Impersonator
 {
@@ -41,27 +40,19 @@ class Impersonator
 
     const SESSION_NAME = 'pretend:_switch_user';
 
-    public function __construct(
-        AuthManager $auth,
-        Repository $config,
-        UserProvider $userProvider,
-        SessionInterface $session,
-        Dispatcher $eventDispatcher
-    )
+    public function __construct(AuthManager $auth, Repository $config, UserProvider $userProvider, SessionInterface $session, Dispatcher $eventDispatcher)
     {
-        $this->guard        = $auth->guard();
-        $this->realUser     = $this->guard->user();
-        $this->config       = $config;
-        $this->userProvider = $userProvider;
-        $this->session      = $session;
+        $this->guard           = $auth->guard();
+        $this->realUser        = $this->guard->user();
+        $this->config          = $config;
+        $this->userProvider    = $userProvider;
+        $this->session         = $session;
         $this->eventDispatcher = $eventDispatcher;
-        $this->isForbidden  = false;
+        $this->isForbidden     = false;
     }
 
     public function exitImpersonation()
     {
-        $this->failIfForbidden();
-
         $username = $this->session->get(static::SESSION_NAME);
 
         if (null === $username) {
@@ -70,7 +61,7 @@ class Impersonator
 
         $this->session->remove(static::SESSION_NAME);
 
-        $user = $this->retrieveUser($username);
+        $user     = $this->retrieveUser($username);
         $realUser = $this->guard->user();
 
         $event = new Unimprersonated($realUser, $user);
@@ -79,6 +70,7 @@ class Impersonator
 
     /**
      * @throws \HttpException Throw 403 exception if cannot find user
+     *
      * @param string $username
      *
      * @return Authenticatable
@@ -105,9 +97,7 @@ class Impersonator
      */
     public function enterImpersonation(string $username)
     {
-        $this->failIfForbidden();
-
-        $user = $this->retrieveUser($username);
+        $user     = $this->retrieveUser($username);
         $realUser = $this->guard->user();
 
         if ($user->getAuthIdentifier() === $realUser->getAuthIdentifier()) {
@@ -147,25 +137,5 @@ class Impersonator
     public function getImpersonatingIdentifier(): string
     {
         return $this->session->get(static::SESSION_NAME, '');
-    }
-
-    /**
-     * @throws \HttpException Throw 403 exception if impersonation is forbidden for current request
-     */
-    public function forbidImpersonation()
-    {
-        if (null !== $this->impersonationUser) {
-            abort(403, 'Impersonation is forbidden for current request');
-        }
-
-        $this->isForbidden = true;
-    }
-
-    /**
-     * @throws \HttpException Throw 403 exception if impersonation is forbidden for current request
-     */
-    public function failIfForbidden()
-    {
-        abort_if($this->isForbidden, 403, 'Impersonation is forbidden for current request');
     }
 }
