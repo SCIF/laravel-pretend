@@ -3,7 +3,6 @@
 namespace Scif\LaravelPretend;
 
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Session\SessionInterface;
 use Illuminate\Support\ServiceProvider;
 use Scif\LaravelPretend\Service\Impersonator;
 
@@ -40,12 +39,6 @@ class LaravelPretendServiceProvider extends ServiceProvider
           ->needs(UserProvider::class)
           ->give(function (): UserProvider {
               return \Auth::getProvider();
-          });
-
-        $this->app->when(Impersonator::class)
-          ->needs(SessionInterface::class)
-          ->give(function (): SessionInterface {
-              return $this->app->make('session.store');
           });
 
         $this->app->singleton(Impersonator::class, Impersonator::class);

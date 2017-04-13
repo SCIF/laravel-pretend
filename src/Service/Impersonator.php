@@ -8,7 +8,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Session\SessionInterface;
+use Illuminate\Session\Store;
 use Scif\LaravelPretend\Event\Impersonated;
 use Scif\LaravelPretend\Event\Unimprersonated;
 
@@ -23,7 +23,7 @@ class Impersonator
     /** @var  UserProvider */
     protected $userProvider;
 
-    /** @var SessionInterface $session */
+    /** @var Store $session */
     protected $session;
 
     /** @var Dispatcher $eventDispatcher */
@@ -40,7 +40,7 @@ class Impersonator
 
     const SESSION_NAME = 'pretend:_switch_user';
 
-    public function __construct(AuthManager $auth, Repository $config, UserProvider $userProvider, SessionInterface $session, Dispatcher $eventDispatcher)
+    public function __construct(AuthManager $auth, Repository $config, UserProvider $userProvider, Store $session, Dispatcher $eventDispatcher)
     {
         $this->guard           = $auth->guard();
         $this->realUser        = $this->guard->user();
@@ -108,7 +108,7 @@ class Impersonator
         $this->guard->setUser($user);
 
         if (!$this->session->has(static::SESSION_NAME)) {
-            $this->session->set(static::SESSION_NAME, $username);
+            $this->session->put(static::SESSION_NAME, $username);
 
             $event = new Impersonated($realUser, $user);
             $this->eventDispatcher->fire($event);
