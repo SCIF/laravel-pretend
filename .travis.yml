@@ -28,7 +28,8 @@ matrix:
         - env: LARAVEL_VERSION="dev-master"
 
 before_install:
-    - phpenv config-rm xdebug.ini
+    - export SKIP_XDEBUG_DISABLE=(hhvm nightly)
+    - if [[ ! ${SKIP_XDEBUG_DISABLE[*]} =~ "$TRAVIS_PHP_VERSION" ]]; then phpenv config-rm xdebug.ini; fi;
     - composer self-update
     - if [ "${LARAVEL_VERSION}" != "" ]; then composer require --no-update "laravel/laravel:${LARAVEL_VERSION}"; fi;
 
