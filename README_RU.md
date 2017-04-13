@@ -1,3 +1,5 @@
+[![Тесты](https://travis-ci.org/SCIF/laravel-pretend.svg?branch=master)](https://travis-ci.org/SCIF/laravel-pretend)
+
 # Имперсонализация для Laravel Framework
 
 [In english](README.md)

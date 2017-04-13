@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/SCIF/laravel-pretend.svg?branch=master)](https://travis-ci.org/SCIF/laravel-pretend)
+
 # Impersonate package for the Laravel Framework
 
 [На русском](README_RU.md)
