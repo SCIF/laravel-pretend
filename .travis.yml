@@ -9,6 +9,7 @@ php:
     - 7.1
     - nightly
     - hhvm-3.12
+    - hhvm-nightly
 
 cache:
     directories:
@@ -26,6 +27,7 @@ matrix:
 
     allow_failures:
         - php: hhvm-3.12
+        - php: hhvm-nightly
         - php: nightly
         - env: LARAVEL_VERSION="dev-master"
 
