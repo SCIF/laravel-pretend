@@ -1,3 +1,5 @@
+dist: trusty
+
 sudo: false
 
 language: php
@@ -6,7 +8,7 @@ php:
     - 7.0
     - 7.1
     - nightly
-    - hhvm
+    - hhvm-3.12
 
 cache:
     directories:
@@ -28,8 +30,8 @@ matrix:
         - env: LARAVEL_VERSION="dev-master"
 
 before_install:
-    - export SKIP_XDEBUG_DISABLE=(hhvm nightly)
-    - if [[ ! ${SKIP_XDEBUG_DISABLE[*]} =~ $(phpenv version-name) ]]; then phpenv config-rm xdebug.ini; fi;
+    - if [[ "${TRAVIS_PHP_VERSION::4}" == 'hhvm' ]]; then echo hhvm.php7.all=1 >> /etc/hhvm/php.ini; fi
+    - if [[ ! ("${TRAVIS_PHP_VERSION}" == "nightly" || "${TRAVIS_PHP_VERSION::4}" == "hhvm") ]]; then phpenv config-rm xdebug.ini; fi;
     - composer self-update
     - if [ "${LARAVEL_VERSION}" != "" ]; then composer require --no-update "laravel/laravel:${LARAVEL_VERSION}"; fi;
 
