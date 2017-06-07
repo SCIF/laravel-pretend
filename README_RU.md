@@ -1,3 +1,4 @@
+[![Coverage Status](https://coveralls.io/repos/github/SCIF/laravel-pretend/badge.svg?branch=master)](https://coveralls.io/github/SCIF/laravel-pretend?branch=master)
 [![Тесты](https://travis-ci.org/SCIF/laravel-pretend.svg?branch=master)](https://travis-ci.org/SCIF/laravel-pretend)
 
 # Имперсонализация для Laravel Framework

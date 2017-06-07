@@ -1,3 +1,4 @@
+[![Coverage Status](https://coveralls.io/repos/github/SCIF/laravel-pretend/badge.svg?branch=master)](https://coveralls.io/github/SCIF/laravel-pretend?branch=master)
 [![Build Status](https://travis-ci.org/SCIF/laravel-pretend.svg?branch=master)](https://travis-ci.org/SCIF/laravel-pretend)
 
 # Impersonate package for the Laravel Framework
