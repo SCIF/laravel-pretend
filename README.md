@@ -1,5 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/SCIF/laravel-pretend/badge.svg?branch=master)](https://coveralls.io/github/SCIF/laravel-pretend?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/SCIF/laravel-pretend/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/SCIF/laravel-pretend/?branch=master)
 [![Build Status](https://travis-ci.org/SCIF/laravel-pretend.svg?branch=master)](https://travis-ci.org/SCIF/laravel-pretend)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/SCIF/laravel-pretend/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/SCIF/laravel-pretend/?branch=master)
 
 # Impersonate package for the Laravel Framework
 
