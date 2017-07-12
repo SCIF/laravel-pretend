@@ -28,8 +28,8 @@ matrix:
         - env: LARAVEL_VERSION="dev-master"
 
 before_install:
-    - if [[ "${TRAVIS_PHP_VERSION::4}" == 'hhvm' ]]; then echo hhvm.php7.all=1 >> /etc/hhvm/php.ini; fi
-    - if [[ ! ("${TRAVIS_PHP_VERSION}" == "nightly" || "${TRAVIS_PHP_VERSION::4}" == "hhvm") ]]; then phpenv config-rm xdebug.ini; fi;
+        #    - if [[ "${TRAVIS_PHP_VERSION::4}" == 'hhvm' ]]; then echo hhvm.php7.all=1 >> /etc/hhvm/php.ini; fi
+        #    - if [[ ! ("${TRAVIS_PHP_VERSION}" == "nightly" || "${TRAVIS_PHP_VERSION::4}" == "hhvm") ]]; then phpenv config-rm xdebug.ini; fi;
     - composer self-update
     - if [ "${LARAVEL_VERSION}" != "" ]; then composer require --no-update "laravel/laravel:${LARAVEL_VERSION}"; fi;
 
@@ -37,7 +37,7 @@ install:
     - composer update ${COMPOSER_FLAGS} --prefer-source
 
 script:
-    - vendor/bin/phpunit --colors --coverage-clover=coverage.clover
+    - vendor/bin/phpunit --coverage-clover=coverage.clover
 
 after_script:
     - wget https://scrutinizer-ci.com/ocular.phar
