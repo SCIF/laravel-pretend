@@ -5,7 +5,9 @@ namespace Scif\LaravelPretend\Tests;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Support\Facades\Event;
 use Scif\LaravelPretend\Event\Impersonated;
+use Scif\LaravelPretend\Event\Unimprersonated;
 use Scif\LaravelPretend\LaravelPretendServiceProvider;
 use Scif\LaravelPretend\Middleware\Impersonate;
 use Scif\LaravelPretend\Service\Impersonator;
@@ -17,12 +19,18 @@ class Test extends TestCase
 
     protected $baseUrl = 'http://localhost';
 
+    public function tearDown()
+    {
+        \Mockery::close();
+    }
+
     public function testMain()
     {
+        Event::fake();
         $admin = $this->getAdmin();
         $user = $this->getUser();
 
-        \Auth::setProvider($this->mockUserProvider($user));
+        \Auth::setProvider($this->mockUserProvider($user, 3));
 
         $this->assertFalse(
             $this->app->make(Impersonator::class)->isImpersonated(),
@@ -34,17 +42,39 @@ class Test extends TestCase
         $response = $this->actingAs($admin)
                         ->get('test?_switch_user=' . $user->email);
 
+        Event::assertDispatched(Impersonated::class, function (Impersonated $event) {
+            $this->assertEquals(1, $event->getRealUser()->getAuthIdentifier());
+            $this->assertEquals(2, $event->getImpersonationUser()->getAuthIdentifier());
+
+            return true;
+        });
+
         $response->assertRedirectedTo('test');
 
         $this->assertTrue(
             $this->app->make(Impersonator::class)->isImpersonated(),
-            'Impersonator service reports user has not been impersonated'
+            'Impersonator service reports failed impersonation status'
         );
 
         $this->assertEquals(
             $user,
             $this->app->make('auth')->guard()->user(),
             'Impersonated and expected users are different'
+        );
+
+        $response = $response->actingAs($admin)->followRedirects();
+        $response->actingAs($admin)->visit('test?_switch_user=_exit');
+
+        Event::assertDispatched(Unimprersonated::class, function (Unimprersonated $event) {
+            $this->assertEquals(1, $event->getRealUser()->getAuthIdentifier());
+            $this->assertEquals(2, $event->getImpersonationUser()->getAuthIdentifier());
+
+            return true;
+        });
+
+        $this->assertFalse(
+            $this->app->make(Impersonator::class)->isImpersonated(),
+            'Impersonator service reports failed impersonation status when exit was done'
         );
     }
 
@@ -65,6 +95,26 @@ class Test extends TestCase
             'Cannot impersonate yourself',
             $response->response->exception->getMessage(),
             'Incorrect text of same user impersonation or incorrect exception thrown'
+        );
+    }
+
+    public function testUavailableUser()
+    {
+        $admin = $this->getAdmin();
+
+        \Auth::setProvider($this->mockUserProviderReturnNull());
+
+        $this->doesntExpectEvents(Impersonated::class);
+
+        $response = $this->actingAs($admin)
+                        ->get('test?_switch_user=unavailable@email.tld');
+
+        $response->assertResponseStatus(403);
+
+        $this->assertSame(
+            'Cannot find user by this credentials',
+            $response->response->exception->getMessage(),
+            'Incorrect message of exception thrown if user was not found in UserProvider'
         );
     }
 
@@ -139,6 +189,17 @@ class Test extends TestCase
                 ->times($times)
                 ->with(['email' => $user->email])
                 ->andReturn($user);
+
+        return $mock;
+    }
+
+    protected function mockUserProviderReturnNull(): UserProvider
+    {
+        $mock = \Mockery::mock(UserProvider::class);
+
+        $mock->shouldReceive('retrieveByCredentials')
+                ->with(['email' => 'unavailable@email.tld'])
+                ->andReturn(null);
 
         return $mock;
     }
