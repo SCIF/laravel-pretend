@@ -16,10 +16,10 @@
   "type": "library",
   "require": {
     "php": ">=7.0",
-    "laravel/framework": "~5.3"
+    "laravel/framework": "^5.3.10"
   },
   "require-dev": {
-    "laravel/laravel": "~5.3",
+    "laravel/laravel": "^5.3.10",
     "laravel/browser-kit-testing": "^1.0.3",
     "phpunit/phpunit": "^5.7",
     "mockery/mockery": "0.9.*"

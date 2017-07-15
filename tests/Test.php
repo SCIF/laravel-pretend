@@ -42,7 +42,7 @@ class Test extends TestCase
         $response = $this->actingAs($admin)
                         ->get('test?_switch_user=' . $user->email);
 
-        Event::assertDispatched(Impersonated::class, function (Impersonated $event) {
+        $this->eventDispatched(Impersonated::class, function (Impersonated $event) {
             $this->assertEquals(1, $event->getRealUser()->getAuthIdentifier());
             $this->assertEquals(2, $event->getImpersonationUser()->getAuthIdentifier());
 
@@ -65,7 +65,7 @@ class Test extends TestCase
         $response = $response->actingAs($admin)->followRedirects();
         $response->actingAs($admin)->visit('test?_switch_user=_exit');
 
-        Event::assertDispatched(Unimprersonated::class, function (Unimprersonated $event) {
+        $this->eventDispatched(Unimprersonated::class, function (Unimprersonated $event) {
             $this->assertEquals(1, $event->getRealUser()->getAuthIdentifier());
             $this->assertEquals(2, $event->getImpersonationUser()->getAuthIdentifier());
 
