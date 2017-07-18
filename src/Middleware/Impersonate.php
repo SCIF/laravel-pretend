@@ -58,6 +58,11 @@ class Impersonate
     public function handle(Request $request, Closure $next)
     {
         $name = $request->query('_switch_user', null);
+        $allMiddlewares = $request->route()->gatherMiddleware();
+
+        if (in_array(ForbidImpersonation::class, $allMiddlewares, true)) {
+            abort(403, 'This route is forbidden to access as impersonated user');
+        }
 
         if (null !== $name) {
             $this->checkPermission($name);
