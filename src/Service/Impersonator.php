@@ -10,7 +10,7 @@ use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Session\Store;
 use Scif\LaravelPretend\Event\Impersonated;
-use Scif\LaravelPretend\Event\Unimprersonated;
+use Scif\LaravelPretend\Event\Unimpersonated;
 
 class Impersonator
 {
@@ -40,8 +40,13 @@ class Impersonator
 
     const SESSION_NAME = 'pretend:_switch_user';
 
-    public function __construct(AuthManager $auth, Repository $config, UserProvider $userProvider, Store $session, Dispatcher $eventDispatcher)
-    {
+    public function __construct(
+        AuthManager $auth,
+        Repository $config,
+        UserProvider $userProvider,
+        Store $session,
+        Dispatcher $eventDispatcher
+    ) {
         $this->guard           = $auth->guard();
         $this->realUser        = $this->guard->user();
         $this->config          = $config;
@@ -64,7 +69,7 @@ class Impersonator
         $user     = $this->retrieveUser($username);
         $realUser = $this->guard->user();
 
-        $event = new Unimprersonated($realUser, $user);
+        $event = new Unimpersonated($realUser, $user);
         $this->eventDispatcher->fire($event);
     }
 
@@ -110,8 +115,7 @@ class Impersonator
         if (!$this->session->has(static::SESSION_NAME)) {
             $this->session->put(static::SESSION_NAME, $username);
 
-            $event = new Impersonated($realUser, $user);
-            $this->eventDispatcher->fire($event);
+            $this->eventDispatcher->fire(new Impersonated($realUser, $user));
         }
     }
 
@@ -126,10 +130,6 @@ class Impersonator
     public function continueImpersonation()
     {
         $name = $this->getImpersonatingIdentifier();
-
-        if (null === $name) {
-            throw new \RuntimeException('Cannot find impersonating data in session');
-        }
 
         $this->enterImpersonation($name);
     }

@@ -2,4 +2,4 @@
 
 namespace Scif\LaravelPretend\Event;
 
-class Unimprersonated extends Impersonated { }
+class Unimpersonated extends Impersonated {}
