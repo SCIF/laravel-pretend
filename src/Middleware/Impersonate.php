@@ -69,11 +69,9 @@ class Impersonate
 
             if ('_exit' === $name) {
                 $this->impersonator->exitImpersonation();
-            } else {
-                if ($this->impersonator->isImpersonated()) {
+            } elseif ($this->impersonator->isImpersonated()) {
                     abort(403, 'Cannot use impersonation once you already done that');
-                }
-
+            } else {
                 $this->impersonator->enterImpersonation($name);
             }
 

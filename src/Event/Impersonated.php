@@ -30,5 +30,4 @@ class Impersonated
     {
         return $this->impersonationUser;
     }
-
 }

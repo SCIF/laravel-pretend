@@ -31,9 +31,6 @@ class Impersonator
     protected $eventDispatcher;
 
     /** @var  Authenticatable */
-    protected $realUser;
-
-    /** @var  Authenticatable */
     protected $impersonationUser;
 
     /** @var  bool */
@@ -49,7 +46,6 @@ class Impersonator
         Dispatcher $eventDispatcher
     ) {
         $this->guard           = $auth->guard();
-        $this->realUser        = $this->guard->user();
         $this->config          = $config;
         $this->userProvider    = $userProvider;
         $this->session         = $session;
@@ -71,7 +67,7 @@ class Impersonator
         $this->session->remove(static::SESSION_NAME);
 
         $user  = $this->retrieveUser($username);
-        $event = new Unimpersonated($this->realUser, $user);
+        $event = new Unimpersonated($this->guard->user(), $user);
 
         $this->eventDispatcher->fire($event);
     }
@@ -102,8 +98,9 @@ class Impersonator
     public function enterImpersonation(string $username)
     {
         $user     = $this->retrieveUser($username);
+        $realUser = $this->guard->user();
 
-        if ($user->getAuthIdentifier() === $this->realUser->getAuthIdentifier()) {
+        if ($user->getAuthIdentifier() === $realUser->getAuthIdentifier()) {
             abort(403, 'Cannot impersonate yourself');
         }
 
@@ -113,7 +110,7 @@ class Impersonator
         if (!$this->session->has(static::SESSION_NAME)) {
             $this->session->put(static::SESSION_NAME, $username);
 
-            $this->eventDispatcher->fire(new Impersonated($this->realUser, $user));
+            $this->eventDispatcher->fire(new Impersonated($realUser, $user));
         }
     }
 
