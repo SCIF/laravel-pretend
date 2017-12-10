@@ -36,8 +36,7 @@ class Impersonate
         Repository $config,
         Impersonator $impersonator,
         Redirector $redirect
-    )
-    {
+    ) {
         $this->guard        = $guard;
         $this->gate         = $gate;
         $this->config       = $config;
@@ -57,6 +56,7 @@ class Impersonate
      */
     public function handle(Request $request, Closure $next)
     {
+        /** @var string $name */
         $name = $request->query('_switch_user', null);
         $allMiddlewares = $request->route()->gatherMiddleware();
 
@@ -115,7 +115,7 @@ class Impersonate
             });
         }
 
-        if (!$this->gate->forUser($this->guard->user())->check($ability, [ $username] )) {
+        if (!$this->gate->forUser($this->guard->user())->check($ability, [$username])) {
             abort(403, "Current user have no ability '{$ability}'");
         }
     }

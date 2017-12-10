@@ -2,6 +2,7 @@
 
 namespace Scif\LaravelPretend\Service;
 
+use HttpException;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
@@ -56,6 +57,9 @@ class Impersonator
         $this->isForbidden     = false;
     }
 
+    /**
+     * @throws HttpException Throw 403 exception if cannot find user
+     */
     public function exitImpersonation()
     {
         $username = $this->session->get(static::SESSION_NAME);
@@ -66,19 +70,14 @@ class Impersonator
 
         $this->session->remove(static::SESSION_NAME);
 
-        $user     = $this->retrieveUser($username);
-        $realUser = $this->guard->user();
+        $user  = $this->retrieveUser($username);
+        $event = new Unimpersonated($this->realUser, $user);
 
-        $event = new Unimpersonated($realUser, $user);
         $this->eventDispatcher->fire($event);
     }
 
     /**
-     * @throws \HttpException Throw 403 exception if cannot find user
-     *
-     * @param string $username
-     *
-     * @return Authenticatable
+     * @throws HttpException Throw 403 exception if cannot find user
      */
     protected function retrieveUser(string $username): Authenticatable
     {
@@ -96,16 +95,15 @@ class Impersonator
     }
 
     /**
-     * @throws \HttpException Throw 403 exception if you try to impersonate yourself
+     * @throws HttpException Throw 403 exception if you try to impersonate yourself
      *
      * @param string $username Username of user you want to enter impersonate
      */
     public function enterImpersonation(string $username)
     {
         $user     = $this->retrieveUser($username);
-        $realUser = $this->guard->user();
 
-        if ($user->getAuthIdentifier() === $realUser->getAuthIdentifier()) {
+        if ($user->getAuthIdentifier() === $this->realUser->getAuthIdentifier()) {
             abort(403, 'Cannot impersonate yourself');
         }
 
@@ -115,7 +113,7 @@ class Impersonator
         if (!$this->session->has(static::SESSION_NAME)) {
             $this->session->put(static::SESSION_NAME, $username);
 
-            $this->eventDispatcher->fire(new Impersonated($realUser, $user));
+            $this->eventDispatcher->fire(new Impersonated($this->realUser, $user));
         }
     }
 
@@ -125,7 +123,7 @@ class Impersonator
     }
 
     /**
-     * @throws \HttpException Throw 403 exception if cannot find data in session
+     * @throws HttpException Throw 403 exception if cannot find data in session
      */
     public function continueImpersonation()
     {
