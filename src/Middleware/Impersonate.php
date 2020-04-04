@@ -56,6 +56,10 @@ class Impersonate
      */
     public function handle(Request $request, Closure $next)
     {
+        if ($this->guard->guest()) {
+            return $next($request);
+        }
+
         /** @var string $name */
         $name = $request->query('_switch_user', null);
         $allMiddlewares = $request->route()->gatherMiddleware();
